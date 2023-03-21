@@ -13,7 +13,7 @@ class MyUserCreateSerializer(UserCreateSerializer):
             'first_name',
             'last_name',
             'password',
-    )
+        )
 
 
 class MyUserSerializer(UserSerializer):
@@ -27,5 +27,4 @@ class MyUserSerializer(UserSerializer):
             'first_name',
             'last_name',
             'password',
-    )
-
+        )
