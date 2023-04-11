@@ -7,6 +7,7 @@ SECRET_KEY = '!ypt+sdd@hm#122^@(_9zum6spxyq==ytrm14v94**wm$gws(p'
 
 DEBUG = True
 
+
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -80,8 +81,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -92,15 +98,17 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+    'HIDE_USERS': False,
+    'LOGIN_FIELD': 'email',
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },
 
     'SERIALIZERS': {
-        'user_create': 'users.serializers.MyUserCreateSerializer',
-        'user': 'users.serializers.MyUserSerializer',
-        'current_user': 'users.serializers.MyUserSerializer',
+        'user_create': 'api.serializers.serializers_users.MyUserCreateSerializer',
+        'user': 'api.serializers.serializers_users.UserSerializer',
+        'current_user': 'api.serializers.serializers_users.UserSerializer',
     },
 }
 
