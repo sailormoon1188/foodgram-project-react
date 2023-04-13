@@ -25,7 +25,7 @@ class Ingredients(models.Model):
         help_text='Ед. изм.',
         default='шт'
     )
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
 
     class Meta:
         ordering = ('name', )

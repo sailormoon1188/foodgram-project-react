@@ -1,9 +1,10 @@
 from django.forms import ValidationError
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
+from recipes.models import Recipes
 from users.models import User
-from recipes.models import Recipes, Subscriptions
-from .serializers_reviews import ShortRecipeSerializer
+from recipes.models import Subscriptions
+#from .serializers_recipes import ShortRecipeSerializer
 
 
 class MyUserCreateSerializer(UserCreateSerializer):
@@ -41,7 +42,7 @@ class MyUserCreateSerializer(UserCreateSerializer):
         return lower_username
 
 
-class UserSerializer(UserSerializer):
+class MyUserSerializer(UserSerializer):
 
     is_subscribed = serializers.SerializerMethodField()
 
@@ -63,6 +64,16 @@ class UserSerializer(UserSerializer):
         return Subscriptions.objects.filter(
             user=request.user, author=obj
         ).exists()
+
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    """Отображает краткую информацию о рецепте."""
+
+    class Meta:
+        model = Recipes
+        fields = ('id', 'name', 'image', 'cooking_time')
+
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -136,6 +147,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         else:
             queryset = Recipes.objects.filter(
                 author=obj.author)
+
         serializer = ShortRecipeSerializer(
             queryset, read_only=True, many=True
         )

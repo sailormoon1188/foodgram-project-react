@@ -1,22 +1,28 @@
 from django.db.models import Sum
 from django.forms import ValidationError
-from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets
+from rest_framework import (generics, permissions,
+                            status, views, viewsets)
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from .filters import IngredientsFilter, RecipeFilter
 from recipes.models import (Favorite, Ingredients,
                             IngredientInRecipe, Recipes,
-                            ShoppingCart, Tags)
+                            ShoppingCart,
+                            Subscriptions, Tags)
+from users.models import User
+from .paginations import CustomPagination
 from .permissions import (IsOwnerOrReadOnly)
 
-from .serializers.serializers_reviews import (
+from .serializers.serializers_recipes import (
      AddUpdateRecipesSerializer, IngredientsSerializer,
      RecipesListSerializer, ShortRecipeSerializer,
      TagsSerializer
 )
+from .serializers.serializers_users import (
+      SubscriptionSerializer, SubscribeSerializer
+ )
 from .utils import convert_txt
 
 
@@ -43,6 +49,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
        Action-функционал: избранное и список покупок.
     """
     queryset = Recipes.objects.all()
+    pagination_class = CustomPagination
     permission_classes = (IsOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -110,8 +117,36 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return convert_txt(ingredients)
 
 
-class UsersViewSet(UserViewSet):
-    """Вьюсет для работы с пользователями и подписками.
-    Обработка запросов на создание/получение пользователей и
-    создание/получение/удаления подписок."""
-    
+class SubscriptionViewSet(generics.ListAPIView):
+    serializer_class = SubscriptionSerializer
+    pagination_class = CustomPagination
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.follower.all()
+
+
+class SubscribeView(views.APIView):
+    pagination_class = CustomPagination
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, pk):
+        author = get_object_or_404(User, pk=pk)
+        user = self.request.user
+        data = {'author': author.id, 'user': user.id}
+        serializer = SubscribeSerializer(
+            data=data, context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk):
+        author = get_object_or_404(User, pk=pk)
+        user = self.request.user
+        subscription = get_object_or_404(
+            Subscriptions, user=user, author=author
+        )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
