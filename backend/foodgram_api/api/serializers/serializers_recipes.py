@@ -1,11 +1,13 @@
 import base64
-from django.db import transaction
-from django.core.files.base import ContentFile
-from rest_framework import serializers
+
 import webcolors
+from django.core.files.base import ContentFile
+from django.db import transaction
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from recipes.models import (Ingredients, IngredientInRecipe,
-                            Recipes, Tags)
+
+from recipes.models import IngredientInRecipe, Ingredients, Recipes, Tags
+
 from .serializers_users import UserSerializer
 
 
@@ -31,7 +33,7 @@ class Hex2NameColor(serializers.Field):  # ready
         return data
 
 
-class TagsSerializer(serializers.ModelSerializer):  # ready
+class TagsSerializer(serializers.ModelSerializer):
     color = Hex2NameColor()
 
     class Meta:
@@ -40,7 +42,7 @@ class TagsSerializer(serializers.ModelSerializer):  # ready
         read_only_fields = ('id', 'name', 'color', 'slug')
 
 
-class IngredientsSerializer(serializers.ModelSerializer):  # ready
+class IngredientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredients

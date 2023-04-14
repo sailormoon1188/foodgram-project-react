@@ -1,10 +1,9 @@
 from django.forms import ValidationError
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
-from recipes.models import Recipes
+
+from recipes.models import Recipes, Subscriptions
 from users.models import User
-from recipes.models import Subscriptions
-#from .serializers_recipes import ShortRecipeSerializer
 
 
 class MyUserCreateSerializer(UserCreateSerializer):
@@ -66,14 +65,12 @@ class MyUserSerializer(UserSerializer):
         ).exists()
 
 
-
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Отображает краткую информацию о рецепте."""
 
     class Meta:
         model = Recipes
         fields = ('id', 'name', 'image', 'cooking_time')
-
 
 
 class SubscribeSerializer(serializers.ModelSerializer):

@@ -1,11 +1,13 @@
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = '!ypt+sdd@hm#122^@(_9zum6spxyq==ytrm14v94**wm$gws(p'
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure")
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default=True)
 
 
 ALLOWED_HOSTS = ['*']
@@ -58,12 +60,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_api.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'USER': os.getenv('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.getenv('DB_HOST', 'db'),
+            'PORT': os.getenv('DB_PORT', '5432')
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -114,8 +128,13 @@ DJOSER = {
 
 AUTH_USER_MODEL = 'users.User'
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 LANGUAGE_CODE = 'ru-ru'
 
@@ -126,5 +145,3 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-STATIC_URL = '/static/'

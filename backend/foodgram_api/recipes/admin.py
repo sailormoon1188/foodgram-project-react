@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Favorite, Ingredients, IngredientInRecipe, Recipes
-from .models import Subscriptions, ShoppingCart, Tags
+
+from .models import (Favorite, IngredientInRecipe, Ingredients, Recipes,
+                     ShoppingCart, Subscriptions, Tags)
 
 
 class QuantityInline(admin.TabularInline):
@@ -54,7 +55,6 @@ class RecipesAdmin(admin.ModelAdmin):
 
     def is_favorited(self, instance):
         return instance.favorite_recipes.count()
-    #  На странице рецепта вывести общее число добавлений этого рецепта в избранное.
 
 
 @admin.register(Favorite)
