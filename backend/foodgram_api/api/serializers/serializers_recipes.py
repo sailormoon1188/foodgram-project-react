@@ -3,10 +3,9 @@ import base64
 import webcolors
 from django.core.files.base import ContentFile
 from django.db import transaction
+from recipes.models import IngredientInRecipe, Ingredients, Recipes, Tags
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
-from recipes.models import IngredientInRecipe, Ingredients, Recipes, Tags
 
 from .serializers_users import UserSerializer
 
@@ -133,7 +132,8 @@ class AddUpdateRecipesSerializer(serializers.ModelSerializer):
         tags = data['tags']
         if not tags:
             raise serializers.ValidationError(
-                    'добавьте тег рецепта')
+                'добавьте тег рецепта'
+            )
         for tag_name in tags:
             if not Tags.objects.filter(name=tag_name).exists():
                 raise serializers.ValidationError(
