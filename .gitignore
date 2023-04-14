@@ -132,3 +132,6 @@ dmypy.json
 # .idea
 .idea
 .venv/
+
+# db_data
+dump.json
