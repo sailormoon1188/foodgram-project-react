@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -62,7 +63,7 @@ class Recipes(models.Model):
     )
     tags = models.ManyToManyField(
         Tags,
-        related_name='recipes',
+        through='RecipeTags',
         verbose_name='Тег',
         help_text='Теги к рецептам'
     )
@@ -111,6 +112,20 @@ class IngredientInRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} - {self.amount}'
+
+
+class RecipeTags(models.Model):
+    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE,
+                               related_name='recipe_tags')
+    tag = models.ForeignKey(Tags, on_delete=models.CASCADE,
+                            related_name='recipe_tags')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['recipe', 'tag'],
+                                    name='recipe_tag_unique')
+        ]
 
 
 class Favorite(models.Model):

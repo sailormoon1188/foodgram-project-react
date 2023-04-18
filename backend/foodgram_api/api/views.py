@@ -1,12 +1,13 @@
 from django.db.models import Sum
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, IngredientInRecipe, Ingredients, Recipes,
-                            ShoppingCart, Subscriptions, Tags)
 from rest_framework import generics, permissions, status, views, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+
+from recipes.models import (Favorite, IngredientInRecipe, Ingredients, Recipes,
+                            ShoppingCart, Subscriptions, Tags)
 from users.models import User
 
 from .filters import IngredientsFilter, RecipeFilter
@@ -15,7 +16,6 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers.serializers_recipes import (AddUpdateRecipesSerializer,
                                               IngredientsSerializer,
                                               RecipesListSerializer,
-                                              ShortRecipeSerializer,
                                               TagsSerializer)
 from .serializers.serializers_users import (SubscribeSerializer,
                                             SubscriptionSerializer)
@@ -58,20 +58,14 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def add_recipe(self, model, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
-        user = self.request.user
-        if model.objects.filter(recipe=recipe, user=user).exists():
-            raise ValidationError('Рецепт уже добавлен')
-        model.objects.create(recipe=recipe, user=user)
-        serializer = ShortRecipeSerializer(recipe)
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+    def perform_update(self, serializer):
+        serializer.save(author=self.request.user)
 
-    def delete_recipe(self, model, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
-        user = self.request.user
-        obj = get_object_or_404(model, recipe=recipe, user=user)
-        obj.delete()
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.author != self.request.user:
+            raise PermissionDenied("Вы не можете удалить этот рецепт.")
+        self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -81,8 +75,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk=None):
         if request.method == 'POST':
-            return self.add_recipe(Favorite, request, pk)
-        return self.delete_recipe(Favorite, request, pk)
+            return self._add_recipe(Favorite, request, pk)
+        return self._delete_recipe(Favorite, request, pk)
 
     @action(
         detail=True,
@@ -91,8 +85,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         if request.method == 'POST':
-            return self.add_recipe(ShoppingCart, request, pk)
-        return self.delete_recipe(ShoppingCart, request, pk)
+            return self._add_recipe(ShoppingCart, request, pk)
+        return self._delete_recipe(ShoppingCart, request, pk)
 
     @action(
         detail=False,

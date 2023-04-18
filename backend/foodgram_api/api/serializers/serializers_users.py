@@ -1,7 +1,8 @@
 from django.forms import ValidationError
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Recipes, Subscriptions
 from rest_framework import serializers
+
+from recipes.models import Recipes, Subscriptions
 from users.models import User
 
 
@@ -41,8 +42,17 @@ class MyUserCreateSerializer(UserCreateSerializer):
 
 
 class MyUserSerializer(UserSerializer):
+    """сериализатор для получения юзера и подписок"""
 
     is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return False
+        return Subscriptions.objects.filter(
+            user=request.user, author=obj
+        ).exists()
 
     class Meta:
         model = User
@@ -55,14 +65,6 @@ class MyUserSerializer(UserSerializer):
             'is_subscribed',
         )
 
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Subscriptions.objects.filter(
-            user=request.user, author=obj
-        ).exists()
-
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Отображает краткую информацию о рецепте."""
@@ -73,10 +75,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Subscriptions
-        fields = ('user', 'author')
+    """сериализатор создания и удаления подписки на атора рецепта"""
 
     def to_representation(self, instance):
         request = self.context.get('request')
@@ -100,8 +99,14 @@ class SubscribeSerializer(serializers.ModelSerializer):
             )
         return data
 
+    class Meta:
+        model = Subscriptions
+        fields = ('user', 'author')
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """сериализатор получения подписок и полных данных об авторе рецепта.
+    В выдачу добавляются рецепты"""
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -114,19 +119,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField(
         method_name='get_recipes_count'
     )
-
-    class Meta:
-        model = Subscriptions
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count'
-        )
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
@@ -151,3 +143,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
+
+    class Meta:
+        model = Subscriptions
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )

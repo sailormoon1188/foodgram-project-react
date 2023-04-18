@@ -8,6 +8,8 @@ class User(AbstractUser):
         ('admin', 'Администратор'),
     )
 
+    DEFAULT_ROLE = ROLES[0][0]
+
     username = models.CharField(
         'username',
         unique=True, max_length=255
@@ -31,7 +33,7 @@ class User(AbstractUser):
         help_text='Администратор или пользователь.'
         'По умолчанию `user`.',
         choices=ROLES,
-        default='user'
+        default=DEFAULT_ROLE
     )
 
     USERNAME_FIELD = 'email'
