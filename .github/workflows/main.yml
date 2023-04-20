@@ -58,13 +58,11 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: |
-            cd foodgram-project-react/infra
+          script: |          
             sudo docker pull mariavan88/foodgram_api:v1
             sudo docker pull mariavan88/foodgram_frontend:v1.0
             sudo docker-compose stop
             sudo docker-compose rm backend
-            rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
