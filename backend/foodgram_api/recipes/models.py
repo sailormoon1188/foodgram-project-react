@@ -1,13 +1,34 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from users.models import User
 
 
 class Tags(models.Model):
+    name_validator = RegexValidator(
+        regex=r'^[а-яА-Я]+$',
+        message='Название тега должно'
+        'содержать только буквы русского алфавита',
+        code='invalid_name'
+    )
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название тега',
+        unique=True,
+        validators=[name_validator]
+    )
     name = models.CharField(max_length=200,
                             verbose_name='Название тега', unique=True)
     slug = models.SlugField(verbose_name='слаг для тега', unique=True)
-    color = models.CharField(max_length=7, verbose_name='цвет тега')
+    color_validator = RegexValidator(
+        regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
+        message='HEX-код цвета должен быть в формате #RRGGBB или #RGB',
+        code='invalid_color'
+    )
+    color = models.CharField(
+        max_length=7,
+        verbose_name='цвет тега',
+        validators=[color_validator]
+    )
 
     class Meta:
         verbose_name = "Тег"
