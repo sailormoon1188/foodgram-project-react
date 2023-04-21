@@ -5,7 +5,7 @@ from users.models import User
 
 class Tags(models.Model):
     name_validator = RegexValidator(
-        regex=r'^[а-яА-Я]+$',
+        regex=r'^[А-Яа-я]+[^\W\d_]*[А-Яа-я]*$',
         message='Название тега должно'
         'содержать только буквы русского алфавита',
         code='invalid_name'
@@ -16,8 +16,6 @@ class Tags(models.Model):
         unique=True,
         validators=[name_validator]
     )
-    name = models.CharField(max_length=200,
-                            verbose_name='Название тега', unique=True)
     slug = models.SlugField(verbose_name='слаг для тега', unique=True)
     color_validator = RegexValidator(
         regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$',
