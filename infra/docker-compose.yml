@@ -1,26 +1,15 @@
 version: '3.3'
 services:
-  db:
-    image: postgres:13.0-alpine
-    volumes:
-      - postgres-db-data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env
 
   frontend:
     image: mariavan88/foodgram_frontend:v1.0
     volumes:
       - ../frontend/:/app/result_build/
-  
-  backend:
-    image: mariavan88/foodgram_api:v1
-    restart: always
+
+  db:
+    image: postgres:13.0-alpine
     volumes:
-      - static_value:/app/static/
-      - media_value:/app/media/
-      - docs:/app/api/docs/
-    depends_on:
-      - db
+      - postgres-db-data:/var/lib/postgresql/data/
     env_file:
       - ./.env
   
@@ -34,10 +23,20 @@ services:
       - docs:/usr/share/nginx/html/api/docs/
       - static_value:/var/html/static/
       - media_value:/var/html/media/
-
     depends_on:
       - backend
-      - frontend
+
+  backend:
+    image: mariavan88/foodgram_api:v1
+    restart: always
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+      - docs:/app/api/docs/
+    depends_on:
+      - db
+    env_file:
+      - ./.env
 
 volumes:
   postgres-db-data:
