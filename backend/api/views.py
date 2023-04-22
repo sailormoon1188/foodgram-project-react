@@ -15,6 +15,7 @@ from .permissions import IsOwnerOrReadOnly
 from .serializers.serializers_recipes import (AddUpdateRecipesSerializer,
                                               IngredientsSerializer,
                                               RecipesListSerializer,
+                                              ShortRecipeSerializer,
                                               TagsSerializer)
 from .serializers.serializers_users import (SubscribeSerializer,
                                             SubscriptionSerializer)
@@ -65,6 +66,20 @@ class RecipesViewSet(viewsets.ModelViewSet):
         if instance.author != self.request.user:
             raise PermissionDenied("Вы не можете удалить этот рецепт.")
         self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _add_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        user = self.request.user
+        model.objects.create(recipe=recipe, user=user)
+        serializer = ShortRecipeSerializer(recipe)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+    def _delete_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        user = self.request.user
+        obj = get_object_or_404(model, recipe=recipe, user=user)
+        obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(

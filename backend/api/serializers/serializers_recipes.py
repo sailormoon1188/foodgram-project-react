@@ -3,8 +3,10 @@ import base64
 import webcolors
 from django.core.files.base import ContentFile
 from django.db import transaction
-from recipes.models import (IngredientInRecipe, Ingredients, Recipes,
-                            RecipeTags, Tags)
+from recipes.models import (Favorite, IngredientInRecipe,
+                            Ingredients, Recipes,
+                            RecipeTags,
+                            ShoppingCart, Tags)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -137,10 +139,11 @@ class AddUpdateRecipesSerializer(serializers.ModelSerializer):
         else:
             queryset = Recipes.objects.all()
         if queryset.filter(
-            name=data['name']
+            name=data.get('name')
         ).exists():
             raise serializers.ValidationError(
                 'Рецепт уже существует.')
+
         return data
 
     def validate_cooking_time(self, cooking_time):
@@ -256,3 +259,28 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipes
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+# class FavoriteSerializer(serializers.ModelSerializer):
+#     """Сериализатор добавления/удаления рецепта в избранное."""
+#     class Meta:
+#         model = Favorite
+#         fields = ('user', 'recipe')
+
+#     def validate(self, data):
+#         user, recipe = data.get('user'), data.get('recipe')
+#         if self.Meta.model.objects.filter(user=user, recipe=recipe).exists():
+#             raise serializers.ValidationError(
+#                 {'error': 'Этот рецепт уже добавлен'}
+#             )
+#         return data
+
+#     def to_representation(self, instance):
+#         context = {'request': self.context.get('request')}
+#         return ShortRecipeSerializer(instance.recipe, context=context).data
+
+
+# class ShoppingCartSerializer(FavoriteSerializer):
+#     """Сериализатор добавления/удаления рецепта в список покупок."""
+#     class Meta(FavoriteSerializer.Meta):
+#         model = ShoppingCart

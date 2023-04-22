@@ -3,6 +3,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Recipes, Subscriptions
 from rest_framework import serializers
 from users.models import User
+from . import serializers_recipes
 
 
 class MyUserCreateSerializer(UserCreateSerializer):
@@ -63,14 +64,6 @@ class MyUserSerializer(UserSerializer):
             'last_name',
             'is_subscribed',
         )
-
-
-class ShortRecipeSerializer(serializers.ModelSerializer):
-    """Отображает краткую информацию о рецепте."""
-
-    class Meta:
-        model = Recipes
-        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
@@ -135,7 +128,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             queryset = Recipes.objects.filter(
                 author=obj.author)
 
-        serializer = ShortRecipeSerializer(
+        serializer = serializers_recipes.ShortRecipeSerializer(
             queryset, read_only=True, many=True
         )
         return serializer.data

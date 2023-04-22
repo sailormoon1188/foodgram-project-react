@@ -1,11 +1,18 @@
 from django.contrib import admin
 
-from .models import (Favorite, IngredientInRecipe, Ingredients, Recipes,
+from .models import (Favorite, IngredientInRecipe,
+                     Ingredients, Recipes, RecipeTags,
                      ShoppingCart, Subscriptions, Tags)
 
 
 class QuantityInline(admin.TabularInline):
     model = IngredientInRecipe
+    min_num = 1
+    extra = 0
+
+
+class TagsInline(admin.TabularInline):
+    model = RecipeTags
     min_num = 1
     extra = 0
 
@@ -40,12 +47,14 @@ class TagsAdmin(admin.ModelAdmin):
 
 @admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
-    inlines = (QuantityInline, )
+    inlines = (QuantityInline, TagsInline)
     list_display = (
         'pk',
         'name',
-        'author'
+        'author',
+        'display_tags',
     )
+    list_filter = ('name', 'author', 'tags')
     search_fields = (
         'name',
         'author__username',
@@ -53,8 +62,13 @@ class RecipesAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('is_favorited',)
 
-    def is_favorited(self, instance):
-        return instance.favorite_recipes.count()
+    def is_favorited(self, obj):
+        return obj.favorite.count()
+    is_favorited.short_description = 'Раз в избранном'
+
+    def display_tags(self, obj):
+        return ', '.join([tag.name for tag in obj.tags.all()])
+    display_tags.short_description = 'Теги'
 
 
 @admin.register(Favorite)
