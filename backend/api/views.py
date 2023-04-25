@@ -45,10 +45,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
        Action-функционал: избранное и список покупок.
     """
     queryset = Recipes.objects.all()
-    pagination_class = CustomPagination
-    permission_classes = (IsOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    pagination_class = CustomPagination
+    permission_classes = (IsOwnerOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

@@ -34,86 +34,86 @@ _Для обмена кулинарными рецептами любимых б
 POST: http://localhost/api/auth/token/login/
 ~~~
 {
-"password": "string",
-"email": "string"
+  "password": "string",
+  "email": "string"
 }
 ~~~
  Регистрация нового пользователя:
 POST: http://localhost/api/users/
 ~~~
 {
-"email": "vpupkin@yandex.ru",
-"username": "vasya.pupkin",
-"first_name": "Вася",
-"last_name": "Пупкин",
-"password": "Qwerty123"
+  "email": "vpupkin@yandex.ru",
+  "username": "vasya.pupkin",
+  "first_name": "Вася",
+  "last_name": "Пупкин",
+  "password": "Qwerty123"
 }
 ~~~
 Изменение пароля:
 POST: http://localhost/api/users/set_password/
 ~~~
 {
-"new_password": "string",
-"current_password": "string"
+  "new_password": "string",
+  "current_password": "string"
 }
 ~~~
 Получение списка всех рецептов с пагинацией (токен не требуется):
 GET: http://localhost/api/recipes/
 ~~~
 {
-"count": 123,
-"next": "http://foodgram.example.org/api/recipes/?page=4",
-"previous": "http://foodgram.example.org/api/recipes/?page=2",
-"results": [
-{}
-]
+  "count": 123,
+  "next": "http://foodgram.example.org/api/recipes/?page=4",
+  "previous": "http://foodgram.example.org/api/recipes/?page=2",
+  "results": [
+    {}
+  ]
 }
 ~~~
 Получение списка всех тегов (токен не требуется):
 GET: http://localhost/api/tags/
 ~~~
 [
-{
-"id": 0,
-"name": "Завтрак",
-"color": "#E26C2D",
-"slug": "breakfast"
-}
+  {
+    "id": 0,
+    "name": "Завтрак",
+    "color": "#E26C2D",
+    "slug": "breakfast"
+  }
 ]
 ~~~
 Получить информацию о рецепте по id(токен не требуется):
 GET: http://localhost/api/recipes/{id}/
 ~~~
 {
-"id": 0,
-"tags": [
-{}
-],
-"author": {
-"email": "user@example.com",
-"id": 0,
-"username": "string",
-"first_name": "Вася",
-"last_name": "Пупкин",
-"is_subscribed": false
-},
-"ingredients": [
-{}
-],
-"is_favorited": true,
-"is_in_shopping_cart": true,
-"name": "string",
-"image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-"text": "string",
-"cooking_time": 1
+  "id": 0,
+  "tags": [
+    {}
+  ],
+  "author": {
+    "email": "user@example.com",
+    "id": 0,
+    "username": "string",
+    "first_name": "Вася",
+    "last_name": "Пупкин",
+    "is_subscribed": false
+  },
+  "ingredients": [
+    {}
+  ],
+  "is_favorited": true,
+  "is_in_shopping_cart": true,
+  "name": "string",
+  "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
+  "text": "string",
+  "cooking_time": 1
 }
 ~~~
 Получить инфо об определенном ингредлиенте :
 GET: http://localhost/api/ingredients/{id}/
 {
-"id": 0,
-"name": "Капуста",
-"measurement_unit": "кг"
+  "id": 0,
+  "name": "Капуста",
+  "measurement_unit": "кг"
 }
 ~~~
 Авторизованные пользователи могут добавлять / удалять рецепты из избранного, удалять и редактировать свои подписки на других авторов. Для этого необходимо сделать POST или DELETE запросы 
@@ -122,26 +122,26 @@ GET: http://localhost/api/ingredients/{id}/
 Добавить рецепт в избранное :
 GET:http://localhost/api/recipes/{id}/favorite/
 {
-"id": 0,
-"name": "string",
-"image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
-"cooking_time": 1
+  "id": 0,
+  "name": "string",
+  "image": "http://foodgram.example.org/media/recipes/images/image.jpeg",
+  "cooking_time": 1
 }
 ~~~
 Подписаться на другого автора:
 GET: http://localhost/api/users/{id}/subscribe/
 ~~~
 {
-"email": "user@example.com",
-"id": 0,
-"username": "string",
-"first_name": "Вася",
-"last_name": "Пупкин",
-"is_subscribed": true,
-"recipes": [
-{}
-],
-"recipes_count": 0
+  "email": "user@example.com",
+  "id": 0,
+  "username": "string",
+  "first_name": "Вася",
+  "last_name": "Пупкин",
+  "is_subscribed": true,
+  "recipes": [
+    {}
+  ],
+  "recipes_count": 0
 }
 ~~~
 
@@ -177,7 +177,7 @@ git clone git@hgithub.com/sailormoon2111/foodgram-project-react
 # создаем виртуальное окружение
 python -m venv env
 
-source env/Scripts/activate
+source venv/Scripts/activate
 ```
 ```
 # далее переходим в директорию backend
@@ -193,27 +193,31 @@ docker-compose up -d --build
 ```
 ```
 # далее выполняем миграции
-docker-compose exec web python manage.py makemigrations
-docker-compose exec web python manage.py migrate
+docker-compose exec backend python manage.py makemigrations
+docker-compose exec backend python manage.py migrate
 ```
 ```
 #Создаем суперпользователя:
-docker-compose exec web python manage.py createsuperuser
+docker-compose exec backend python manage.py createsuperuser
 ```
 ```
+#Создаем ингредиенты из CSV файла:
+
+docker-compose exec backend python manage.py add-ingredients
+
 #Сoрбираем статику:
-docker-compose exec web python manage.py collectstatic --no-input
+docker-compose exec backend python manage.py collectstatic --no-input
 ```
 ```
 #Создаем дамп базы данных :
-docker-compose exec web python manage.py dumpdata > dump.json
+docker-compose exec backend python manage.py dumpdata > dump.json
 ```
 ```
 # загрузка фикстур в базу данных
 docker cp dump.json <container id>:app/
 
 # далее 
-docker-compose exec web python manage.py loaddata dump.json
+docker-compose exec backend python manage.py loaddata dump.json
 ```
 ```
 #Остановить контейнеры:
